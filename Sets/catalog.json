@@ -1,0 +1,58 @@
+{
+    "comment": "Symbol set catalog. See ARCHITECTURE.md: one active set per class; sets in different classes must never share a command name.",
+    "classes": [
+        {
+            "id": "prover",
+            "name": "Prover",
+            "default": "lean4",
+            "sets": [
+                {
+                    "id": "lean4",
+                    "name": "Lean 4",
+                    "file": "prover/lean4.json",
+                    "source": {
+                        "format": "flat",
+                        "url": "https://raw.githubusercontent.com/leanprover/vscode-lean4/master/lean4-unicode-input/src/abbreviations.json",
+                        "project": "https://github.com/leanprover/vscode-lean4",
+                        "license": "Apache-2.0",
+                        "licenseUrl": "https://raw.githubusercontent.com/leanprover/vscode-lean4/master/LICENSE",
+                        "licenseFile": "licenses/vscode-lean4-LICENSE"
+                    }
+                },
+                {
+                    "id": "agda",
+                    "name": "Agda",
+                    "file": "prover/agda.json",
+                    "source": {
+                        "format": "agda-keymap",
+                        "url": "https://raw.githubusercontent.com/banacorn/agda-mode-vscode/master/asset/keymap.js",
+                        "project": "https://github.com/banacorn/agda-mode-vscode",
+                        "license": "MIT",
+                        "licenseUrl": "https://raw.githubusercontent.com/banacorn/agda-mode-vscode/master/LICENSE",
+                        "licenseFile": "licenses/agda-mode-vscode-LICENSE"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "emoji",
+            "name": "Emoji",
+            "default": "gemoji",
+            "sets": [
+                {
+                    "id": "gemoji",
+                    "name": "Gemoji",
+                    "file": "emoji/gemoji.json",
+                    "source": {
+                        "format": "gemoji",
+                        "url": "https://raw.githubusercontent.com/github/gemoji/master/db/emoji.json",
+                        "project": "https://github.com/github/gemoji",
+                        "license": "MIT",
+                        "licenseUrl": "https://raw.githubusercontent.com/github/gemoji/master/LICENSE",
+                        "licenseFile": "licenses/gemoji-LICENSE"
+                    }
+                }
+            ]
+        }
+    ]
+}
