@@ -1,0 +1,40 @@
+#!/bin/bash
+# Runs as root after the package has installed the input method into
+# /Library/Input Methods. Registers and enables it for the user at the
+# console. Never fails the install: at worst the user logs out and back in.
+
+APP="/Library/Input Methods/UnicodeSymbolsInput.app"
+CTL="$APP/Contents/MacOS/usi-ctl"
+
+log() { echo "UnicodeSymbolsInput postinstall: $*"; }
+
+# The running copy (if any) would keep serving the old code.
+pkill -x UnicodeSymbolsInput 2>/dev/null || true
+
+user="$(stat -f %Su /dev/console 2>/dev/null || true)"
+case "$user" in
+  "" | root | loginwindow | _mbsetupuser)
+    log "no user logged in; Unicode Symbols will be available after logging in."
+    exit 0 ;;
+esac
+uid="$(id -u "$user" 2>/dev/null || true)"
+if [ -z "$uid" ]; then
+  log "cannot find the uid of $user; log out and back in to use Unicode Symbols."
+  exit 0
+fi
+
+# A per-user copy from ./install.sh would compete with this one (same bundle id).
+# Don't touch the user's files from a root script; just say so.
+home="$(dscl . -read "/Users/$user" NFSHomeDirectory 2>/dev/null | awk '{print $2}')"
+if [ -n "$home" ] && [ -d "$home/Library/Input Methods/UnicodeSymbolsInput.app" ]; then
+  log "warning: another copy is installed at $home/Library/Input Methods/UnicodeSymbolsInput.app"
+  log "(from install.sh). Keep only one: delete that folder, or run ./install.sh --uninstall."
+fi
+
+if launchctl asuser "$uid" sudo -u "$user" "$CTL" register "$APP"; then
+  log "registered and enabled for $user."
+else
+  log "could not register for $user. Log out and back in, then add Unicode Symbols under"
+  log "System Settings > Keyboard > Input Sources > Edit > + > English."
+fi
+exit 0

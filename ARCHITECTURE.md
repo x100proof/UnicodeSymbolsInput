@@ -184,10 +184,18 @@ re-read whenever a text field gains focus.
 ## Build, install, test
 
 There is no Xcode project. `build.sh` calls `swiftc` directly (Command Line Tools are enough):
-tests first, then the app bundle (ad-hoc signed) and `usi-ctl`. `install.sh` copies the bundle
+tests first, then the app bundle (ad-hoc signed) and `usi-ctl`, which is also copied into the
+bundle (`Contents/MacOS/usi-ctl`) so an installed copy can register itself. `UNIVERSAL=1`
+builds arm64 and x86_64 and joins them with `lipo`. `install.sh` copies the bundle
 to `~/Library/Input Methods`, stops the running copy so the new code loads, and registers and
 enables the input source. The tests are a plain executable (`Tests/main.swift`) rather than
 XCTest, for the same reason.
+
+`package.sh` (maintainers) wraps a universal build in a `.pkg` with `pkgbuild`/`productbuild`.
+The package installs into `/Library/Input Methods` (non-relocatable) and its `postinstall`
+script (`Resources/pkg/scripts/postinstall`) registers the input source for the console user
+via the bundled `usi-ctl`. Signing and notarization are opt-in through environment variables.
+Building from source is the supported install; the package is not distributed yet.
 
 The tests cover the catalog rules against the real data, and the composer's behaviour
 (completion order, Tab cycling, accepting, cancelling, `\\`). The InputMethodKit glue and the

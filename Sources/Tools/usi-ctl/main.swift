@@ -2,26 +2,47 @@
 //
 //   usi-ctl status                     classes, their sets, and which is active
 //   usi-ctl use <class> <set|none>     choose a class's set (one per class), e.g. `use prover agda`
-//   usi-ctl register <app>             register and enable an installed input method bundle
+//   usi-ctl register [<app>]           register and enable an installed input method bundle
+//                                      (default: the bundle usi-ctl is in, else the installed copy)
 //   usi-ctl select                     make Unicode Symbols the current input source
 //   usi-ctl unregister                 disable the input source (before deleting the bundle)
 import Carbon
 import Foundation
 
 let bundleID = "org.100proof.inputmethod.UnicodeSymbolsInput"
-let installed = FileManager.default.homeDirectoryForCurrentUser
-    .appendingPathComponent("Library/Input Methods/UnicodeSymbolsInput.app")
+let appName = "UnicodeSymbolsInput.app"
+/// Per-user install (./install.sh) and system-wide install (the .pkg).
+let userInstall = FileManager.default.homeDirectoryForCurrentUser
+    .appendingPathComponent("Library/Input Methods/\(appName)")
+let systemInstall = URL(fileURLWithPath: "/Library/Input Methods/\(appName)")
+
+/// This executable, which is either build/usi-ctl or <app>/Contents/MacOS/usi-ctl.
+let exe = (Bundle.main.executableURL ?? URL(fileURLWithPath: CommandLine.arguments[0]))
+    .resolvingSymlinksInPath()
+/// The app bundle this tool ships in, if it is running from inside one.
+let ownBundle: URL? = {
+    let contents = exe.deletingLastPathComponent().deletingLastPathComponent()
+    let app = contents.deletingLastPathComponent()
+    return contents.lastPathComponent == "Contents" && app.pathExtension == "app" ? app : nil
+}()
+
+/// The bundle `register` uses by default: the one this tool is in, else an installed copy.
+var defaultApp: URL {
+    if let ownBundle { return ownBundle }
+    return FileManager.default.fileExists(atPath: userInstall.path) ? userInstall : systemInstall
+}
 
 func fail(_ message: String) -> Never {
     fputs("usi-ctl: \(message)\n", stderr)
     exit(1)
 }
 
-/// The catalog of the installed input method, or of the repo this tool was built from.
+/// The catalog of this tool's own bundle, an installed copy, or the repo it was built from.
 func loadCatalog() -> Catalog {
-    let exe = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
-    let candidates = [
-        installed.appendingPathComponent("Contents/Resources/Sets"),
+    let sets = "Contents/Resources/Sets"
+    let candidates = [ownBundle?.appendingPathComponent(sets)].compactMap { $0 } + [
+        userInstall.appendingPathComponent(sets),
+        systemInstall.appendingPathComponent(sets),
         exe.deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Sets"),
     ]
     for dir in candidates {
@@ -30,7 +51,11 @@ func loadCatalog() -> Catalog {
     fail("no symbol set catalog found (install the input method first)")
 }
 
-let defaults = UserDefaults(suiteName: bundleID)!
+// Inside the app bundle this tool's own domain *is* the input method's, and
+// Foundation refuses (returns nil) a suite named after the caller's bundle id.
+let defaults = Bundle.main.bundleIdentifier == bundleID
+    ? UserDefaults.standard
+    : UserDefaults(suiteName: bundleID)!
 var choices: [String: String] {
     defaults.dictionary(forKey: "ActiveSets") as? [String: String] ?? [:]
 }
@@ -75,7 +100,7 @@ case "use"?:
     print("\(cls.name): \(cls.set(id: args[2])?.name ?? "none") (applies from the next text field you click into)")
 
 case "register"?:
-    let app = args.count > 1 ? URL(fileURLWithPath: args[1]) : installed
+    let app = args.count > 1 ? URL(fileURLWithPath: args[1]) : defaultApp
     check(TISRegisterInputSource(app as CFURL), "registering \(app.path)")
     guard let source = inputSource() else { fail("registered, but the input source isn't visible yet; log out and in") }
     check(TISEnableInputSource(source), "enabling the input source")

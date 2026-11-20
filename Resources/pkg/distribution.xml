@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- productbuild distribution for package.sh; __VERSION__ is filled in from VERSION. -->
+<installer-gui-script minSpecVersion="2">
+    <title>Unicode Symbols Input</title>
+    <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64"/>
+    <!-- Installs into /Library/Input Methods for every user; needs an administrator. -->
+    <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+    <allowed-os-versions>
+        <os-version min="12.0"/>
+    </allowed-os-versions>
+    <choices-outline>
+        <line choice="org.100proof.pkg.UnicodeSymbolsInput"/>
+    </choices-outline>
+    <choice id="org.100proof.pkg.UnicodeSymbolsInput" visible="false" title="Unicode Symbols Input">
+        <pkg-ref id="org.100proof.pkg.UnicodeSymbolsInput"/>
+    </choice>
+    <pkg-ref id="org.100proof.pkg.UnicodeSymbolsInput" version="__VERSION__" onConclusion="none">UnicodeSymbolsInput-component.pkg</pkg-ref>
+</installer-gui-script>
