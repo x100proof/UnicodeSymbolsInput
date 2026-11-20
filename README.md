@@ -4,16 +4,8 @@ A macOS input method for typing symbols by name in any app: `\to` → `→`, `\a
 `\:tada:` → 🎉. As you type, a list shows every command that starts with what you've typed, so
 you can see whether it will work, and **Tab** completes.
 
-```
-\tri
- ┌──────────────────────────────────────────────┐
- │ △  \triangle                                 │
- │ ▽  \triangledown                             │
- │ ◁  \triangleleft                             │
- │ …                                            │
- │ ⇥ complete  ↑↓ choose  ␣ insert · 7 matches  │
- └──────────────────────────────────────────────┘
-```
+<img src="docs/suggestions.png" width="320" alt="Typing \:sm shows a suggestion list: \:smile: 😄, \:smirk: 😏, \:smiley: 😃, \:smoking: 🚬 and more, with a footer reading: complete, choose, insert, 15 matches.">
+
 
 It comes with symbol sets in two classes. You use one set from each class (or none):
 
@@ -124,6 +116,10 @@ git pull && ./install.sh
 ## Switching sets
 
 From the input menu (the Unicode Symbols icon in the menu bar), tick a set under each class.
+One set per class is ticked at a time; choose None to switch a class off.
+
+<img src="docs/input-menu.png" width="245" alt="The input menu with Unicode Symbols selected. Under Prover: Lean 4, Agda (ticked) and None. Under Emoji: Gemoji (ticked) and None.">
+
 Or from the terminal:
 
 ```sh
